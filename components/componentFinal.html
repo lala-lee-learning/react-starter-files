@@ -17,6 +17,49 @@
     const options = { hour: 'numeric', minute: 'numeric' }
     console.log(location);
 
+    // 拆分元件的重點
+    // 1. 元件的可利用性 Card
+    // 2. 當特定區塊的邏輯比較複雜時 Time
+
+    const Time = ({time}) => {
+      return <>
+        <div className="h4 my-2">
+          {new Date(time.startTime).toLocaleDateString(undefined, {day: 'numeric'})}
+        </div>
+        {new Date(time.startTime).toLocaleString(undefined, {hour: 'numeric', minute: 'numeric'})} <br/>
+        ~ <br/>
+        {new Date(time.endTime).toLocaleString(undefined, {hour: 'numeric', minute: 'numeric'})}
+      </>
+    }
+
+    const Card = ({title, wx, pop}) => {
+      return (
+        <div className="card text-center">
+          <div className="card-header">
+            <div className="h4 my-0">
+              {title}
+            </div>
+          </div>
+          <div className="card-body">
+            <div className="row row-col-3">
+              {wx.time.map((time, index) => {
+                return (
+                  <div className="col" key={index}>
+                    <Time time={time} />
+                    <img src={`./weatherIcon/${time.parameter.parameterName}.svg`} alt={time.parameter.parameterName}/>
+                    <div className="mt-2">{time.parameter.parameterName}</div>
+                    <div className="mt-2"><i className="bi bi-umbrella-fill" />
+                      {pop.time[index].parameter.parameterName}
+                    %</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     const App = () => {
       return (
         <>
@@ -25,34 +68,7 @@
             {location.map((city) => {
               return (
                 <div className="col" key={city.locationName}>
-                  <div className="card text-center">
-                    <div className="card-header">
-                      <div className="h4 my-0">
-                        {city.locationName}
-                      </div>
-                    </div>
-                    <div className="card-body">
-                      <div className="row row-col-3">
-                        {city.weatherElement[0].time.map((time, index) => {
-                          return (
-                            <div className="col" key={index}>
-                              <div className="h4 my-2">
-                                {new Date(time.startTime).toLocaleDateString(undefined, {day: 'numeric'})}
-                              </div>
-                                {new Date(time.startTime).toLocaleString(undefined, {hour: 'numeric', minute: 'numeric'})} <br/>
-                                ~ <br/>
-                                {new Date(time.endTime).toLocaleString(undefined, {hour: 'numeric', minute: 'numeric'})} <br/>
-                                <img src={`./weatherIcon/${time.parameter.parameterName}.svg`} alt={time.parameter.parameterName}/>
-                                <div className="mt-2">{time.parameter.parameterName}</div>
-                                <div className="mt-2"><i className="bi bi-umbrella-fill" />
-                                  {city.weatherElement[4].time[index].parameter.parameterName}
-                                %</div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
+                  <Card title={city.locationName} wx={city.weatherElement[0]} pop={city.weatherElement[4]} />
                 </div>
               )
             })}
