@@ -6,10 +6,26 @@
 <!--  -->
 <div id="root"></div>
 <script type="text/babel">
+const { useState }  = React;
+
+const SearchBox = ({text, onSearchHandler}) => {
+  return (<>
+    <label for="search">搜尋</label>
+    <input id="search" type="text" className="form-control" value={text} onChange={onSearchHandler} />  
+  </>);
+};
 
 const App = () => {
+  const [text, setText] = useState('這是一段文字');
+
+  const onSearchHandler = (e) => {
+    console.log(e.target.value);
+    setText(e.target.value);
+  }
   return (<div>
-    
+    <SearchBox text={text} onSearchHandler={onSearchHandler} />
+    <hr />
+    {text}
   </div>)
 }
 
