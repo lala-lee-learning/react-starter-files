@@ -27,16 +27,30 @@ const SearchBox = ({onSearchHandler, filterString}) => {
   </div>
 }
 
+const Loading = ({isLoading}) => {
+  return (
+    <div className="loading" style={{
+      display: isLoading ? 'flex' : 'none'
+    }}>
+      <div className="spinner-border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  );
+};
+
 // #1 剩餘次數
 // #2 讀取效果
+  // # - 製作畫面的讀取效果
+  // # - 套用狀態
 // #3 取得單張相片，且顯示在畫面上
 
 const App = () => {
   const [filterString, setFilterString] = useState('animal');
   const [jsonData, setJsonData] = useState([]);
   const [ratelimitRemaining, setRatelimitRemaining] = useState(50);
-  // const [isLoading, setIsLoading] = useState(false);
-  const isLoading = useRef(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const isLoadingRef = useRef(false)
   const currentPage = useRef(1);
   const onSearchHandler = (e) => {
     if (e.key === 'Enter') {
@@ -47,7 +61,8 @@ const App = () => {
   const getPhotos = async (page = 1, isNew = true) => {
     try {
         // 搜尋特定需要加入 query
-        isLoading.current = true;
+        isLoadingRef.current = true;
+        setIsLoading(true);
         const result = await axios.get(`${api}?client_id=${accessKey}&query=${filterString}&page=${page}`);
         console.log(result);
         setJsonData((preData) => {
@@ -60,7 +75,8 @@ const App = () => {
         setRatelimitRemaining(result.headers['x-ratelimit-remaining']);
         currentPage.current = page; // 每次都需要確認當前頁
         setTimeout(() => {
-          isLoading.current = false;
+          isLoadingRef.current = false;
+          setIsLoading(false);
         }, 500);
       } catch (error) {
         console.log(error);
@@ -74,7 +90,7 @@ const App = () => {
     const scrollEvent = () => {
       console.log('scroll', window.scrollY); // 垂直滾動的位置
       const height = (listRef.current.offsetHeight + listRef.current.offsetTop) - window.innerHeight;
-      if (!isLoading.current && window.scrollY > height) { // 需要滾動到下方，並沒有在讀取中
+      if (!isLoadingRef.current && window.scrollY > height) { // 需要滾動到下方，並沒有在讀取中
         currentPage.current ++;
         getPhotos(currentPage.current, false); // 應該是頁數增加 1
       }
@@ -84,8 +100,18 @@ const App = () => {
     window.addEventListener('scroll', scrollEvent);
     return () => window.removeEventListener('scroll', scrollEvent);
   }, [filterString]);
+
+  useEffect(() => {
+    const body = document.querySelector('body');
+    if (isLoading) {
+      body.style.overflow = 'hidden';
+    } else {
+      body.style.overflow = 'auto';
+    }
+  }, [isLoading]);
   
   return (<div>
+    <Loading isLoading={isLoading} />
     <SearchBox onSearchHandler={onSearchHandler} filterString={filterString} />
     <p>剩餘請求次數：{ratelimitRemaining}</p>
     <div className='row row-cols-2 g-3' ref={listRef}>
@@ -107,6 +133,19 @@ ReactDOM.createRoot(document.querySelector('#root'))
   /* CSS 樣式，可以確保圖片不要變形 */
   .img-cover {
     object-fit: cover;
+  }
+  .loading {
+    position: fixed;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right:0;
+    background: rbga(255,255,255, 0.25);
+    backdrop-filter: blur(5px);
+    z-index: 99999;
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
   }
 </style>
 <!-- 🙇🙇練習結束🙇🙇 -->
