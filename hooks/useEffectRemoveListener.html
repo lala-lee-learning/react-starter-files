@@ -38,7 +38,6 @@ const App = () => {
   const currentPage = useRef(1);
   const onSearchHandler = (e) => {
     // setFilterString(e.target.value);
-    console.log(e);
     if (e.key === 'Enter') {
       setFilterString(e.target.value);
     }
@@ -49,7 +48,11 @@ const App = () => {
   // #3 加入滾動事件，滾動到列表下方時，取得一筆新的
   // #4 修正過度觸發的問題 -> 加入讀取
 
-  const getPhotos = async (page = 1) => {
+  // Issue
+  // 取得的新資料，居然在第二頁 => #5 輸入文字，資料狀態呈現要正確
+  // 新取得的 AJAX，還是舊的 Animal => #6 確保監聽事件是正常的
+
+  const getPhotos = async (page = 1, isNew = true) => {
     try {
       // 搜尋特定需要加入 query
       // setIsLoading(true);
@@ -57,8 +60,12 @@ const App = () => {
       const result = await axios.get(`${api}?client_id=${accessKey}&query=${filterString}&page=${page}`);
       console.log(result);
       setJsonData((preData) => {
+        if(isNew) {
+          return [...result.data.results];
+        }
         return [...preData, ...result.data.results];
       });
+      currentPage.current = page; // 每次都需要確認當前頁
       setTimeout(() => {
          // setIsLoading(false);
         isLoading.current = false;
@@ -71,15 +78,19 @@ const App = () => {
   const listRef= useRef(null);
 
   useEffect(() => {
-    getPhotos();
-    // 滾動監聽
-    window.addEventListener('scroll', () => {
+    getPhotos(1, true);
+    const scrollEvent = () => {
       const height = listRef.current.offsetHeight + listRef.current.offsetTop - window.innerHeight;
       if(!isLoading.current && window.scrollY > height) { // 需要滾動到下方，且沒有在讀取中
         currentPage.current++;
-        getPhotos(currentPage.current);
+        getPhotos(currentPage.current, false);
       }
-    });
+    };
+    // 滾動監聽
+    window.addEventListener('scroll', scrollEvent);
+
+    // 若改變 filterString 則移除 scroll event 的監聽
+    return () => window.removeEventListener('scroll', scrollEvent);
   }, [filterString])
   
   return (<div>
