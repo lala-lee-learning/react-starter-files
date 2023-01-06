@@ -8,21 +8,40 @@
 <script src="https://cdn.jsdelivr.net/npm/react-hook-form@7.33.1/dist/index.umd.min.js"></script>
 <script type="text/babel">
   const { useState, useEffect } = React;
-  const { useForm } = ReactHookForm;
+  const { useForm, useWatch } = ReactHookForm;
 
   const App = () => {
     const {
       register,
       handleSubmit,
-    } = useForm();
+      watch, // 可將 userForm 當中 register 值取出,
+      control, // 了解當前運作的哪一個 register,
+      getValues, // 取得當前值,
+      setValue, // 寫入值使用,
+    } = useForm({
+      defaultValues: {
+        username: 'lala',
+      },
+    });
     const onSubmit = (data) => {
       console.log(data);
     };
 
     // #watch 當有值寫入時，可以透過 watch 觸發
+    // console.log('watch', watch()); // watch 只能監聽
 
     // #useWatch，如果要監聽表單變化，並搭配 useEffect 運作
-
+    // 先確認當監控表單的狀態
+    const watchForm = useWatch({
+      control
+    });
+    useEffect(() => {
+      console.log('getValues', getValues());
+    }, [watchForm])
+    
+    const resetForm = (e) => {
+      setValue('username', 'momo');
+    }
 
     return (
       <div>
@@ -40,12 +59,15 @@
           </div>
           <div className="mb-3"> 
           <label htmlFor="checkList1">炒麵</label>
-            <input id="checkList1" type="checkbox" name="like" value='炒麵' />
+            <input id="checkList1" type="checkbox" {...register('like')} name="like" value='炒麵' />
             <label htmlFor="checkList2">鍋燒意麵</label>
-            <input id="checkList2" type="checkbox" name="like" value='鍋燒意麵' />
+            <input id="checkList2" type="checkbox" {...register('like')} name="like" value='鍋燒意麵' />
             <label htmlFor="checkList3">炸薯條</label>
-            <input id="checkList3" type="checkbox" name="like" value='炸薯條' />
+            <input id="checkList3" type="checkbox" {...register('like')} name="like" value='炸薯條' />
           </div>
+          <button type='button' onClick={()=>resetForm()} className='btn btn-primary'>
+            重置
+          </button>          
           <button type='submit' className='btn btn-primary'>
             註冊
           </button>
