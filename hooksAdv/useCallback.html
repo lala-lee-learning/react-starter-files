@@ -88,7 +88,7 @@
       } else {
         setItems(items.filter(item => item != e.target.value));
       }
-    }, []); //  初始狀態
+    }, [items]); //  useCallback 的第二個值，可用來設定函式內部使用變數的初始狀態
 
     return (
       <>
