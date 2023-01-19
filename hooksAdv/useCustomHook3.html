@@ -10,8 +10,35 @@ const { useState, useEffect, useRef } = React;
 // https://usehooks.com/
 // https://usehooks.com/useDebounce/
 
+// Hook
+const useDebounce = (value, delay) => {
+  // State and setters for debounced value
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(
+    () => {
+      // Update debounced value after delay
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+      // Cancel the timeout if value changes (also on delay change or unmount)
+      // This is how we prevent debounced value from updating if value is changed ...
+      // .. within the delay period. Timeout gets cleared and restarted.
+      return () => {
+        clearTimeout(handler);
+      };
+    },
+    [value, delay] // Only re-call effect if value or delay changes
+  );
+  return debouncedValue;
+}
+
 const App = () => {
-  const [text, setText] = useState('')
+  const [text, setText] = useState('');
+  const debounceText = useDebounce(text, 500);
+
+  useEffect(() => {
+    console.log('假設要發出非同步請求');
+  }, [debounceText]);
 
   return (<>
     <input type="text" onChange={e => setText(e.target.value)}
