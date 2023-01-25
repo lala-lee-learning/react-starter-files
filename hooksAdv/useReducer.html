@@ -117,7 +117,7 @@
       });
     };    
 
-    const handleSelectCheck = (e) => {
+    const handleSelectCheck = useCallback((e) => {
       let array = [];
       if (e.target.checked) { // 如果有選擇，就加入本次的選項
         array = [...state.items, e.target.value];
@@ -129,7 +129,7 @@
         type: 'UPDATE_ITEMS',
         payload: array,
       });
-    };   
+    }, [state]);   
 
     const [text, setText] = useState('')
 
