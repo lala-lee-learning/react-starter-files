@@ -73,29 +73,32 @@
   })
 
   let num = 0;
-  const App = () => {
-    const [state, dispatch] = useReducer((state, action) => {
-      console.log(state, action);
-      switch (action.type) {
-        case 'UPDATE_ASCENDING':
-          return {
-            ...state,
-            ascending: action.payload,
-          };
-        case 'UPDATE_SEARCH':
+
+  const reducer = (state, action) => {
+    console.log(state, action);
+    switch (action.type) {
+      case 'UPDATE_ASCENDING':
         return {
           ...state,
-          search: action.payload,
+          ascending: action.payload,
         };
-        case 'UPDATE_ITEMS':
-        return {
-          ...state,
-          items: action.payload,
-        };            
-        default:
-          return state;
-      }
-    }, {
+      case 'UPDATE_SEARCH':
+      return {
+        ...state,
+        search: action.payload,
+      };
+      case 'UPDATE_ITEMS':
+      return {
+        ...state,
+        items: action.payload,
+      };            
+      default:
+        return state;
+    }
+  };
+
+  const App = () => {
+    const [state, dispatch] = useReducer( reducer, {
       // initial value
       products: sampleData,
       ascending: true,
